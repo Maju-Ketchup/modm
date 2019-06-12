@@ -58,6 +58,7 @@ public:
 	static uint32_t RX_ANT_DLY; /**< Receiving Antenna Delay (init to standart: 16436)	*/
 
 	static uint8_t dummy_buffer[1024];
+	static uint8_t dummy_buffer_w[1024];
 	//----------Boot----------------------------------------------------------------------------------
 
 	/**
@@ -320,19 +321,37 @@ public:
 	*@brief
 	*This function turns on and off IRQs when Frames were received
 	*/
-	static void toggleReceiveIRQ();
+	static void enableReceiveIRQ();
 
 	/**
 	*@brief
 	*This function turns on and off IRQs when Frames were send
 	*/
-	static void toggleSendIRQ();
+	static void enableSendIRQ();
 
 	/**
 	*@brief
 	*This function turns on and off IRQs when a Sync signal was received
 	*/
-	static void toggleSyncIRQ();
+	static void enableSyncIRQ();
+
+	/**
+	*@brief
+	*This function turns on and off IRQs when Frames were received
+	*/
+	static void disableReceiveIRQ();
+
+	/**
+	*@brief
+	*This function turns on and off IRQs when Frames were send
+	*/
+	static void disableSendIRQ();
+
+	/**
+	*@brief
+	*This function turns on and off IRQs when a Sync signal was received
+	*/
+	static void disableSyncIRQ();
 
 	/**
 	*@brief

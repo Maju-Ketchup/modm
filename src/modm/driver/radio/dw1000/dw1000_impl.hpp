@@ -34,6 +34,9 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::RX_ANT_DLY = 16436;
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 uint8_t
 modm::Dw1000< Spi, Cs, Reset, Irq >::dummy_buffer[1024] = {0};
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+uint8_t
+modm::Dw1000< Spi, Cs, Reset, Irq >::dummy_buffer_w[1024] = {0};
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 bool
@@ -53,14 +56,11 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::isChannelFree()
 	trxdisable();
 	if (readStatusRegister()&rxEvent)
 	{
-		rxreset();
-		MODM_LOG_INFO.printf("Channel busy\n");
 		return false;
 
 	}
 	else
 	{
-		rxreset();
 		return true;
 	}
 }
@@ -102,23 +102,44 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::getIRQReason()
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 void
-modm::Dw1000< Spi, Cs, Reset, Irq >::toggleReceiveIRQ()
+modm::Dw1000< Spi, Cs, Reset, Irq >::enableReceiveIRQ()
 {
-	setIRQ( readStatusMRegister() ^ (SYS_STATUS_RXDFR | SYS_STATUS_ALL_RX_ERR));
+	setIRQ( readStatusMRegister() | (SYS_STATUS_RXDFR | SYS_STATUS_ALL_RX_ERR));
 }
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 void
-modm::Dw1000< Spi, Cs, Reset, Irq >::toggleSendIRQ()
+modm::Dw1000< Spi, Cs, Reset, Irq >::disableReceiveIRQ()
 {
-	setIRQ(readStatusMRegister() ^ SYS_MASK_MTXFRS);
+	setIRQ( readStatusMRegister() & ~(SYS_STATUS_RXDFR | SYS_STATUS_ALL_RX_ERR));
 }
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 void
-modm::Dw1000< Spi, Cs, Reset, Irq >::toggleSyncIRQ()
+modm::Dw1000< Spi, Cs, Reset, Irq >::enableSendIRQ()
 {
-	setIRQ(readStatusMRegister() ^ SYS_MASK_MESYNCR);
+	setIRQ(readStatusMRegister() | SYS_MASK_MTXFRS);
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::disableSendIRQ()
+{
+	setIRQ(readStatusMRegister() & ~SYS_MASK_MTXFRS);
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::enableSyncIRQ()
+{
+	setIRQ(readStatusMRegister() | SYS_MASK_MESYNCR);
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::disableSyncIRQ()
+{
+	setIRQ(readStatusMRegister() & ~SYS_MASK_MESYNCR);
 }
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
@@ -368,11 +389,10 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::readfromspi(uint16_t headerLength, const ui
 				headerLength/* length */);
 
 	Spi::transferBlocking(
-				(uint8_t*)dummy_buffer   /* w_buffer = dummy write*/,
+				dummy_buffer_w   /* w_buffer = dummy write*/,
 				readBuffer /* r_buffer */, readlength/* length */);
 
 	Cs::set();
-
 
 	return SUCCESS;
 }
