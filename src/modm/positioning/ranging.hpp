@@ -15,7 +15,7 @@
 #ifndef RANGING
 #define RANGING
 
-#include <modm/communication/frame802154/frame802154.hpp> 
+#include <modm/communication/frame802154.hpp>
 
 
 namespace modm {
@@ -57,7 +57,7 @@ public:
 	/* Receive response timeout. */
 	static constexpr int RESP_RX_TIMEOUT_UUS = 635;
 
-	/* Speed of light in vakuum, in meters per second. */
+	/* Speed of light in vacuum, in meters per second. */
 	static constexpr int SPEED_OF_LIGHT = 299792548;
 
 
@@ -151,6 +151,8 @@ public:
 
 private:
 
+	static Frame802154 sendframe;
+
 
 	/**
 	* @brief
@@ -202,7 +204,6 @@ private:
 	*/
 	static void setanswerpayload_tof(uint8_t buffer[], int tof);
 
-private:
 	static uint8_t buffer[256];
 
 };

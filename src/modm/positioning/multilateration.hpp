@@ -22,8 +22,11 @@
 #include <modm/debug/logger.hpp>
 
 using namespace modm::math;
-typedef double floatunit;
 
+#ifndef FLOATUNIT
+	#define FLOATUNIT
+	typedef double floatunit;
+#endif
 namespace modm {
 
 /*!
