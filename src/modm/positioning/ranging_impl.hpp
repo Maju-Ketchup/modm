@@ -24,7 +24,9 @@ modm::Ranging<ComDevice>::buffer[256] ={0};
 
 template < typename ComDevice >
 modm::Frame802154
-modm::Ranging<ComDevice>::sendframe;
+modm::Ranging<ComDevice>::sendframe = modm::Frame802154();
+
+
 
 
 
@@ -62,8 +64,8 @@ modm::Ranging<ComDevice>::sendSSTWRinit()
 	sendframe.setDestinationAddress16(frame802154::broadcast16bitAddress);	//Set destinationaddress
 	sendframe.setSourceAddress16(ComDevice::hostaddress);	//Set Sourceaddress to own address
 	sendframe.setPayload(1,&payload);
-	sendframe.getFrame(buffer);
-	ComDevice::send(sendframe.length, buffer);
+	//sendframe.getFrame(buffer);
+	ComDevice::send(sendframe.length, sendframe.returnbufferpointer());
 	ComDevice::frame_seq_nb++;
 }
 
@@ -80,8 +82,8 @@ modm::Ranging<ComDevice>::sendSSTWRinitAt(uint16_t address)
 	sendframe.setDestinationAddress16(address);	//Set destinationaddress
 	sendframe.setSourceAddress16(ComDevice::hostaddress);	//Set Sourceaddress to own address
 	sendframe.setPayload(1,&payload);
-	sendframe.getFrame(buffer);
-	ComDevice::send(sendframe.length, buffer);
+	//sendframe.getFrame(buffer);
+	ComDevice::send(sendframe.length, sendframe.returnbufferpointer());
 	ComDevice::frame_seq_nb++;
 }
 
@@ -98,8 +100,8 @@ modm::Ranging<ComDevice>::sendDSTWRinit()
 	sendframe.setDestinationAddress16(frame802154::broadcast16bitAddress);	//Set destinationaddress
 	sendframe.setSourceAddress16(ComDevice::hostaddress);	//Set Sourceaddress to own address
 	sendframe.setPayload(1,&payload);
-	sendframe.getFrame(buffer);
-	ComDevice::send(sendframe.length, buffer);
+	//sendframe.getFrame(buffer);
+	ComDevice::send(sendframe.length,sendframe.returnbufferpointer());
 	//sendframe.debugToString();
 	ComDevice::frame_seq_nb++;
 }
@@ -119,8 +121,8 @@ modm::Ranging<ComDevice>::sendDSTWRinitAt(uint16_t address)
 	sendframe.setDestinationAddress16(address);	//Set destinationaddress
 	sendframe.setSourceAddress16(ComDevice::hostaddress);	//Set Sourceaddress to own address
 	sendframe.setPayload(1,&payload);
-	sendframe.getFrame(buffer);
-	ComDevice::send(sendframe.length, buffer);
+	//sendframe.getFrame(buffer);
+	ComDevice::send(sendframe.length, sendframe.returnbufferpointer());
 	//sendframe.debugToString();
 	ComDevice::frame_seq_nb++;
 }
@@ -130,7 +132,7 @@ bool
 modm::Ranging<ComDevice>::sendAnswer(modm::Frame802154 receiveframe)
 {
 
-	receiveframe.getPayload(receiveframe.payloadlength,buffer);
+	receiveframe.getPayload(1,buffer);
 	if (buffer[0] == SSTWR_INIT){
 		return(sendtimestamps(SSTWR_RESP,receiveframe));
 	}
@@ -151,7 +153,7 @@ template < typename ComDevice >
 bool
 modm::Ranging<ComDevice>::IsRangingFrame(modm::Frame802154 receiveframe)
 {
-	receiveframe.getPayload(receiveframe.payloadlength,buffer);
+	receiveframe.getPayload(1,buffer);
 	return (buffer[0] == SSTWR_INIT || buffer[0] == SSTWR_RESP || buffer[0] == DSTWR_INIT0 || buffer[0] == DSTWR_RESP0 || buffer[0] == DSTWR_INIT1 || buffer[0] == DSTWR_RESP1);
 }
 
@@ -209,7 +211,7 @@ template < typename ComDevice >
 void
 modm::Ranging<ComDevice>::sendtof(modm::Frame802154 receiveframe){
 
-	receiveframe.getPayload(receiveframe.payloadlength,buffer);
+	receiveframe.getPayload(1,buffer);
 	if (buffer[0] == DSTWR_INIT1)
 	{
 		int tof = 0;
@@ -223,9 +225,9 @@ modm::Ranging<ComDevice>::sendtof(modm::Frame802154 receiveframe){
 		sendframe.setSequenceNumber(ComDevice::frame_seq_nb);
 		sendframe.setDestinationAddress16(receiveframe.getSourceAddress16());
 		sendframe.setPayload(6,buffer);
-		sendframe.getFrame(buffer);
+		//sendframe.getFrame(buffer);
 		//SEND ANSWER
-		ComDevice::send(sendframe.length,buffer);
+		ComDevice::send(sendframe.length,sendframe.returnbufferpointer());
 		//MODM_LOG_DEBUG.printf("owntx = %llu,ownrx = %llu,responserx = %lu, responsetx= %lu, tof: %d \n", owntx, ownrx,responserx, responsetx, tof);
 		//receiveframe.debugToString();
 		//send.debugToString();
@@ -252,10 +254,10 @@ modm::Ranging<ComDevice>::sendtimestamps(uint8_t flag, modm::Frame802154 receive
 	sendframe.setSequenceNumber(ComDevice::frame_seq_nb);
 	sendframe.setDestinationAddress16(receiveframe.getSourceAddress16());
 	sendframe.setPayload(9,buffer);
-	sendframe.getFrame(buffer);
+	//sendframe.getFrame(buffer);
 	//SEND ANSWER
 	ComDevice::frame_seq_nb ++;
-	return(ComDevice::sendAt(sendframe.length,buffer,sendtime));
+	return(ComDevice::sendAt(sendframe.length,sendframe.returnbufferpointer(),sendtime));
 }
 
 template < typename ComDevice >

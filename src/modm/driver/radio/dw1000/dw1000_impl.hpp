@@ -143,6 +143,13 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::disableSyncIRQ()
 }
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::disableallIRQ()
+{
+    setIRQ(readStatusMRegister() & (~SYS_MASK_MESYNCR|SYS_STATUS_RXDFR | SYS_STATUS_ALL_RX_ERR|SYS_MASK_MTXFRS));
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
 uint32_t
 modm::Dw1000< Spi, Cs, Reset, Irq >::readStatusRegister()
 {
@@ -1077,7 +1084,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::init(config_t &conf){
 
 	if (initialise(LOADUCODE) == ERROR)
 	{
-		MODM_LOG_DEBUG   << "INIT FAILED\n" ;
+		MODM_LOG_ERROR   << "INIT FAILED\n" ;
 		return false;
 	}
 	else{
@@ -1319,4 +1326,36 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::decamutexoff(decaIrqStatus_t s)
 		Irq::enableExternalInterrupt();
 	}
 }
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::setHostandPanAddress(uint64_t newhostaddress,uint16_t newpanaddress)
+{
+	hostaddress = newhostaddress;
+	//write 64BitAdresse into register
+	write32bitoffsetreg(EUI_64_ID, 0, newhostaddress);
+	write32bitoffsetreg(EUI_64_ID, 4, newhostaddress>>32);
+	//write Pan and 16BitAddress
+	write32bitoffsetreg(PANADR_ID, 0, newpanaddress << 16 | (newhostaddress&0xFFFF));
+
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+uint32_t
+modm::Dw1000< Spi, Cs, Reset, Irq >::readHostandPan()
+{
+	return read32bitreg(PANADR_ID);
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::activadeFrameFilter()
+{
+	uint32_t temp= read32bitreg(SYS_CFG_ID) & 0xFFFFFF00;
+	write32bitreg(SYS_CFG_ID,temp | 0x1D);
+
+	MODM_LOG_ERROR.printf("TEST %lx \n", read32bitreg(SYS_CFG_ID));
+}
+
+
 

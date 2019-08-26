@@ -39,6 +39,7 @@ public:
 	static constexpr uint32_t
 	control = (frame802154::DATA<<frame802154::FRAME_TYPE)
 			|(frame802154::PAN_ID_COMPRESSION)
+			|(frame802154::VERSION_2011<<frame802154::FRAME_VERSION)
 			|(frame802154::SHORT_ADDRESS<<frame802154::DEST_ADDRESSING_MODE)
 			|(frame802154::SHORT_ADDRESS<<frame802154::SOURCE_ADDRESSING_MODE)
 			; /*< standart control bytes of a ranging frame */
@@ -55,7 +56,7 @@ public:
 
 
 	/* Receive response timeout. */
-	static constexpr int RESP_RX_TIMEOUT_UUS = 635;
+	static constexpr int RESP_RX_TIMEOUT_UUS = 630;
 
 	/* Speed of light in vacuum, in meters per second. */
 	static constexpr int SPEED_OF_LIGHT = 299792548;
@@ -153,6 +154,8 @@ private:
 
 	static Frame802154 sendframe;
 
+		static uint8_t buffer[256];
+
 
 	/**
 	* @brief
@@ -204,7 +207,6 @@ private:
 	*/
 	static void setanswerpayload_tof(uint8_t buffer[], int tof);
 
-	static uint8_t buffer[256];
 
 };
 }

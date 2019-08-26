@@ -46,8 +46,8 @@ Frame802154::Frame802154(int size, uint8_t data[])
 void
 Frame802154::setControl (uint16_t control)
 {
-	frame[0] = uint8_t(control >> 8);
-	frame[1] = uint8_t(control);
+	frame[0] = uint8_t(control); //LSB first!
+	frame[1] = uint8_t(control >> 8);
 	setbeginvalues();
 	frame[payloadend] = 0;
 	frame[payloadend + 1] = 0 ;
@@ -57,7 +57,7 @@ Frame802154::setControl (uint16_t control)
 uint16_t
 Frame802154::getControl()
 {
-	return (((uint16_t)frame[0] << 8) | frame[1]);
+	return (((uint16_t)frame[1] << 8) | frame[0]);
 }
 
 void
@@ -331,18 +331,18 @@ void
 Frame802154::debugToString()
 {
 	MODM_LOG_DEBUG << "---------IEE802.15.4-2011FRAME------HEADDER--------------"<< modm::endl;
-	MODM_LOG_DEBUG.printf("Frame Control= %x \n", getControl());
+	MODM_LOG_DEBUG.printf("Frame Control= 0x%x \n", getControl());
 	MODM_LOG_DEBUG.printf("SequenceNumber= %d \n",getSequenceNumber());
-	MODM_LOG_DEBUG.printf("DestinationPAN= %x \n", getDestinationPANAddress());
-	MODM_LOG_DEBUG.printf("DestinationAddress= %llx \n", (uint64_t)getDestinationAddress64());
-	MODM_LOG_DEBUG.printf("SourcePAN= %x \n", getSourcePANAddress());
-	MODM_LOG_DEBUG.printf("SourceAddress= %llx \n", (uint64_t)getSourceAddress64());
+	MODM_LOG_DEBUG.printf("DestinationPAN= 0x%x \n", getDestinationPANAddress());
+	MODM_LOG_DEBUG.printf("DestinationAddress= 0x%llx \n", (uint64_t)getDestinationAddress64());
+	MODM_LOG_DEBUG.printf("SourcePAN= 0x%x \n", getSourcePANAddress());
+	MODM_LOG_DEBUG.printf("SourceAddress= 0x%llx \n", (uint64_t)getSourceAddress64());
 	MODM_LOG_DEBUG << "---------PAYLOAD-----------------------------------------"<< modm::endl;
 	MODM_LOG_DEBUG << modm::endl <<  "Payloadbegin: " << payloadbegin  << " Payloadend: " << payloadend << " Payloadlength: " << payloadlength << modm::endl;
 	int i;
-	for (i=0;i<payloadlength;i++)
+	for (i=0;i<length;i++)
 	{
-		MODM_LOG_DEBUG.printf("Payload[%d] = %x \n\n",i,frame[payloadbegin + i]);
+		MODM_LOG_DEBUG.printf("Payload[%d] = 0x%x \n\n",i,frame[i]);
 	}
 }
 
@@ -443,4 +443,8 @@ Frame802154::setbeginvalues()// TODO:: EDIT IF SECURITY COMES IN
 	payloadend = payloadbegin;
 	payloadlength = 0;
 	length = payloadbegin + 2;
+}
+
+uint8_t* Frame802154::returnbufferpointer(){
+	return frame;
 }

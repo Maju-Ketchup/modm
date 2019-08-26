@@ -79,7 +79,7 @@ public:
 	static void
 	/**
 	*@brief
-	*This function sets the receive antenna delay standart 16436
+	*This function sets the receive antenna delay; standard is 16436
 	*@param rxDelay
 	*/
 	setRXAntennaDelay(uint16_t rxDelay);
@@ -87,11 +87,28 @@ public:
 	static void
 	/**
 	*@brief
-	*This function sets the transmit antenna delay 16436
+	*This function sets the transmit antenna delay; standard is 16436
 	*@param rxDelay
 	*/
 	setTXAntennaDelay(uint16_t rxDelay);
 
+	static void
+	/**
+	*@brief
+	*This function sets the host and panaddress in the DWM1000
+	*@param newhostaddress
+	*@param newpanaddress
+	*/
+	setHostandPanAddress(uint64_t newhostaddress,uint16_t newpanaddress);
+
+	static void
+	/**
+	*@brief
+	*This function activades the framefiltering at the DW1000 this means only data and ACK messages are received when the destination address is the hostaddress
+	*/
+	activadeFrameFilter();
+
+	static uint32_t readHostandPan();
 
 	//----------------Sending
 
@@ -319,39 +336,45 @@ public:
 
 	/**
 	*@brief
-	*This function turns on and off IRQs when Frames were received
+    *This function turns on  IRQs when Frames were received
 	*/
 	static void enableReceiveIRQ();
 
 	/**
 	*@brief
-	*This function turns on and off IRQs when Frames were send
+    *This function turns on  IRQs when Frames were send
 	*/
 	static void enableSendIRQ();
 
 	/**
 	*@brief
-	*This function turns on and off IRQs when a Sync signal was received
+    *This function turns on IRQs when a Sync signal was received
 	*/
 	static void enableSyncIRQ();
 
 	/**
 	*@brief
-	*This function turns on and off IRQs when Frames were received
+    *This function turns off IRQs when Frames were received
 	*/
 	static void disableReceiveIRQ();
 
 	/**
 	*@brief
-	*This function turns on and off IRQs when Frames were send
+    *This function turns off IRQs when Frames were send
 	*/
 	static void disableSendIRQ();
 
 	/**
 	*@brief
-	*This function turns on and off IRQs when a Sync signal was received
+    *This function turns off IRQs when a Sync signal was received
 	*/
 	static void disableSyncIRQ();
+
+    /**
+    *@brief
+    *This function turns off all IRQsd
+    */
+    static void disableallIRQ();
 
 	/**
 	*@brief

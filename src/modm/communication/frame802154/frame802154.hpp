@@ -51,6 +51,9 @@ public:
 		ACKNOWLEDGMENT			= 0b010,
 		MAC_COMMAND				= 0b011,
 
+		VERSION_2004			= 0x00,
+		VERSION_2011			= 0x01,
+
 		//ADRESSING MODES
 
 		NOPAN_AND_NOADRESSFIELD	= 0b00,
@@ -97,7 +100,7 @@ public:
  *
  * |Bit:    |       0 + 1 + 2         |       3         |    4        |5 |    6             |   7   +    8   +   9   |    10  +   11              |    12  -   13  |   14   -  15      |
  * |--------|-------------------------|-----------------|-------------|--|------------------|------------------------|----------------------------|----------------|-------------------|
- * |Content:|        Frame Type       |Security Enabled |Frame Pending|AR|PAN ID Compression|        Reserved        |  Destination Address Mode  | Frame Version  | Sorce Address Mode|
+ * |Content:|        Frame Type       |Security Enabled |Frame Pending|AR|PAN ID Compression|        Reserved        |  Destination Address Mode  | Frame Version  | Source Address Mode|
  *
  *
  *
@@ -120,7 +123,7 @@ public:
  *	uint8_t payload = 0xE0;\n
  *	static uint8_t buffer[256];\n
  *
- *	control = (frame802154::DATA<<frame802154::FRAME_TYPE)
+ *	uint16_t control = (frame802154::DATA<<frame802154::FRAME_TYPE)
  *		|(frame802154::PAN_ID_COMPRESSION)
  *		|(frame802154::SHORT_ADDRESS<<frame802154::DEST_ADDRESSING_MODE)
  *		|(frame802154::SHORT_ADDRESS<<frame802154::SOURCE_ADDRESSING_MODE)
@@ -320,6 +323,8 @@ public:
 	* prints the package Information into the Log stream
 	*/
 	void debugToString();
+
+	uint8_t* returnbufferpointer();
 
 
 private:
