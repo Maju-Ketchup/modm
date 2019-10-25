@@ -40,7 +40,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::dummy_buffer_w[1024] = {0};
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 bool
-modm::Dw1000< Spi, Cs, Reset, Irq >::isChannelFree()
+modm::Dw1000< Spi, Cs, Reset, Irq >::isChannelFree(uint32_t microseconds)
 {
 	const uint32_t rxEvent = (SYS_STATUS_RXPRD	|
 							  SYS_STATUS_RXSFDD	|
@@ -51,9 +51,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::isChannelFree()
 							  SYS_STATUS_RXFCG	|
 							  SYS_STATUS_RXFCE);
 	write32bitreg(SYS_STATUS_ID,rxEvent);
-	rxEnable();
-	modm::delayMicroseconds(50);
-	trxdisable();
+	modm::delayMicroseconds(microseconds);
 	if (readStatusRegister()&rxEvent)
 	{
 		return false;
@@ -274,6 +272,17 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::send(int size, uint8_t data[])
 }
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::writeSendBuffer(uint16_t size, uint8_t data[])
+{
+	if (size < 3 || size > 1023)
+	{size = 3;}
+	write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS);
+	writetxdata(size, data, 0); // writes TX DATA to DWM1000
+	writetxfctrl(size, 0, 0); //write control
+}
+
+template < typename Spi, typename Cs, typename Reset, typename Irq >
 bool
 modm::Dw1000< Spi, Cs, Reset, Irq >::checkForRX()
 {
@@ -368,6 +377,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::writetospi(
 		uint32_t bodylength,
 		const uint8_t *bodyBuffer)
 {
+	__disable_irq();
 	// MODM_LOG_DEBUG.printf("write\n");
 	Cs::reset();
 
@@ -380,7 +390,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::writetospi(
 			dummy_buffer /* r_buffer */, bodylength/* length */);
 
 	Cs::set();
-
+	__enable_irq();
 	return SUCCESS;
 }
 
@@ -389,6 +399,7 @@ int
 modm::Dw1000< Spi, Cs, Reset, Irq >::readfromspi(uint16_t headerLength, const uint8_t *headerBuffer, uint32_t readlength, uint8_t *readBuffer)
 {	// MODM_LOG_DEBUG.printf("read\n");
 	Cs::reset();
+	__disable_irq();
 
 	Spi::transferBlocking(
 				(uint8_t*)headerBuffer /* w_buffer */,
@@ -400,7 +411,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::readfromspi(uint16_t headerLength, const ui
 				readBuffer /* r_buffer */, readlength/* length */);
 
 	Cs::set();
-
+	__enable_irq();
 	return SUCCESS;
 }
 
@@ -820,23 +831,13 @@ template < typename Spi, typename Cs, typename Reset, typename Irq >
 int
 modm::Dw1000< Spi, Cs, Reset, Irq >::starttx(TX_Mode mode)
 {
-	/*int retval = SUCCESS ;
-	uint8_t temp  = 0x00;
-
-	temp |= (uint8_t)SYS_CTRL_TXSTRT ;
-	write8bitoffsetreg(SYS_CTRL_ID, SYS_CTRL_OFFSET, temp);
-
-
-	return retval;*/
 	int retval = SUCCESS ;
 	uint8_t temp  = 0x00;
 	uint16_t checkTxOK = 0 ;
 
 	if(mode & RESPONSE_EXPECTED)
 	{
-		temp = (uint8_t)SYS_CTRL_WAIT4RESP ; // Set wait4response bit
-		write8bitoffsetreg(SYS_CTRL_ID, SYS_CTRL_OFFSET, temp);
-		//dw1000local.wait4resp = 1;
+		temp = (uint8_t)(SYS_CTRL_WAIT4RESP| SYS_CTRL_TXSTRT) ; // Set wait4response bit
 	}
 
 	if (mode & START_TX_DELAYED)
@@ -1336,7 +1337,7 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::setHostandPanAddress(uint64_t newhostaddres
 	write32bitoffsetreg(EUI_64_ID, 0, newhostaddress);
 	write32bitoffsetreg(EUI_64_ID, 4, newhostaddress>>32);
 	//write Pan and 16BitAddress
-	write32bitoffsetreg(PANADR_ID, 0, newpanaddress << 16 | (newhostaddress&0xFFFF));
+	write32bitoffsetreg(PANADR_ID, 0, (uint32_t)newpanaddress << 16 | (newhostaddress&0xFFFF));
 
 }
 
@@ -1349,13 +1350,37 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::readHostandPan()
 
 template < typename Spi, typename Cs, typename Reset, typename Irq >
 void
-modm::Dw1000< Spi, Cs, Reset, Irq >::activadeFrameFilter()
+modm::Dw1000< Spi, Cs, Reset, Irq >::enableFrameFilter()
 {
 	uint32_t temp= read32bitreg(SYS_CFG_ID) & 0xFFFFFF00;
 	write32bitreg(SYS_CFG_ID,temp | 0x1D);
-
-	MODM_LOG_ERROR.printf("TEST %lx \n", read32bitreg(SYS_CFG_ID));
+}
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::enableAutoACK()
+{
+	write8bitoffsetreg(ACK_RESP_T_ID, ACK_RESP_T_ACK_TIM_OFFSET, 0);
+	uint32_t temp= read32bitreg(SYS_CFG_ID);
+	write32bitreg(SYS_CFG_ID,temp | SYS_CFG_AUTOACK);
 }
 
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+bool
+modm::Dw1000< Spi, Cs, Reset, Irq >::selfcheck()
+{
+	if (DEVICE_ID != readdevid()) // MP IC ONLY (i.e. DW1000) FOR THIS CODE
+	{
+		return false;
+	}
+	return true;
+}
 
+template < typename Spi, typename Cs, typename Reset, typename Irq >
+void
+modm::Dw1000< Spi, Cs, Reset, Irq >::hardreset()
+{
+	Reset::set();
+	modm::delayMilliseconds(5);
+	Reset::reset();
+}
 

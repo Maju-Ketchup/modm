@@ -32,9 +32,9 @@ public:
 	enum class IRQreason : uint8_t{
 		RX_Complete 	= 1,
 		TX_Complete 	= 2,
-		RX_Error	= 3,
-		Sync		= 4,
-		Unknown		= 0
+		RX_Error		= 3,
+		Sync			= 4,
+		Unknown			= 0
 	};
 
 	enum PRF : uint8_t{
@@ -124,8 +124,6 @@ public:
 
 	static local_data_t dw1000local;
 
-private:
-#include "./deca_regs.hpp"
 
 	enum TX_Mode{
 		START_TX_IMMEDIATE			= 0,
@@ -139,6 +137,9 @@ private:
 		NO_SYNC_PTRS				= 4    //< Do not try to sync IC side and Host side buffer pointers when enabling RX. This is used to perform manual RX
 
 	};
+
+private:
+#include "./deca_regs.hpp"
 
 
 	//config stuff

@@ -340,9 +340,9 @@ Frame802154::debugToString()
 	MODM_LOG_DEBUG << "---------PAYLOAD-----------------------------------------"<< modm::endl;
 	MODM_LOG_DEBUG << modm::endl <<  "Payloadbegin: " << payloadbegin  << " Payloadend: " << payloadend << " Payloadlength: " << payloadlength << modm::endl;
 	int i;
-	for (i=0;i<length;i++)
+	for (i=0;i<payloadlength;i++)
 	{
-		MODM_LOG_DEBUG.printf("Payload[%d] = 0x%x \n\n",i,frame[i]);
+		MODM_LOG_DEBUG.printf("Payload[%d] = 0x%x \n\n",i,frame[payloadbegin + i]);
 	}
 }
 
@@ -381,6 +381,17 @@ Frame802154::addPayload(uint32_t size, uint8_t data[])
 		payloadlength++;
 		length++;
 	}
+	frame[payloadend] = 0x0;
+	frame[payloadend+1] = 0x0;
+}
+
+void
+Frame802154::addPayload(uint8_t data)
+{
+	frame[payloadend] = data;
+	payloadend++;
+	payloadlength++;
+	length++;
 	frame[payloadend] = 0x0;
 	frame[payloadend+1] = 0x0;
 }

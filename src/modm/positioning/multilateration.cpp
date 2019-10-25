@@ -27,7 +27,7 @@ void modm::multilateration::activemultilaterationNewton(Vector<floatunit, 3> &ou
 														floatunit receiveAnchor3,
 														floatunit receiveAnchor4)
 {
-	floatunit speedoflight = 299792548.f;
+	floatunit speedoflight = 299792458.f;
 	//Berechne TOF zum Ausgangsvektor
     floatunit tof0 = powl(anchor1[0] - output[0],2) + powl(anchor1[1] - output[1],2) + powl(anchor1[2] - output[2],2);
 	tof0 = (sqrt(tof0)/speedoflight)-receiveAnchor1;

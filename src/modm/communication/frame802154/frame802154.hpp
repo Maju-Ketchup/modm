@@ -307,11 +307,19 @@ public:
 	void getPayload(int size,uint8_t data[]);
 	/**
 	* @brief
-	* adds payload of the length [size] and adds behind it to the actual payload
+	* adds payload of the length [size] behind the actual payload
 	* @param size
 	* @param data[]
 	*/
 	void addPayload(uint32_t size, uint8_t data[]);
+	/**
+	* @brief
+	* adds 1 Byte payload behind the actual payload
+	* @param size
+	* @param data[]
+	*/
+	void addPayload(uint8_t data);
+
 	/**
 	* @brief
 	* deletes the whole payload

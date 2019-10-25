@@ -106,7 +106,14 @@ public:
 	*@brief
 	*This function activades the framefiltering at the DW1000 this means only data and ACK messages are received when the destination address is the hostaddress
 	*/
-	activadeFrameFilter();
+	enableFrameFilter();
+
+	static void
+	/**
+	*@brief
+	*This function activades automatic ACK of Frames if Configured
+	*/
+	enableAutoACK();
 
 	static uint32_t readHostandPan();
 
@@ -123,6 +130,16 @@ public:
 	*returns if the send was successfull
 	*/
 	send(int size, uint8_t data[]);
+
+	static void
+	/**
+	*@brief
+	*This function sends 'size' bytes of the given data array
+	*@param size
+	*minimum 3 maximim 1023
+	*@param data
+	*/
+	writeSendBuffer(uint16_t size, uint8_t data[]);
 
 	static bool
 	/**
@@ -183,9 +200,19 @@ public:
 	/**
 	*@brief
 	*This function listens 1 ms to the channel if the channel is free it returns true if it is busy false
-	*@return bool
+	*@param uint32_t the amound of wich the medium is listned to microseconds
+	*@return bool true if medium is free
 	*/
-	isChannelFree();
+	isChannelFree(uint32_t microseconds);
+
+	static int
+	/**
+	*@brief
+	*
+	*@param mode
+	*@return int
+	*/
+	starttx(TX_Mode mode);
 
 
 
@@ -398,6 +425,8 @@ public:
 	*/
 	static uint32_t readStatusRegister();
 
+	static bool selfcheck();
+	static void hardreset();
 	/**
 	*@brief
 	*
@@ -573,14 +602,6 @@ private:
 	*/
 	write8bitoffsetreg(int regFileID, int regOffset, uint8_t regval);
 
-	static int
-	/**
-	*@brief
-	*
-	*@param mode
-	*@return int
-	*/
-	starttx(TX_Mode mode);
 
 
 
