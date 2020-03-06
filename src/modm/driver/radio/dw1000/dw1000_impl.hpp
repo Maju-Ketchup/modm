@@ -835,12 +835,12 @@ modm::Dw1000< Spi, Cs, Reset, Irq >::starttx(TX_Mode mode)
 	uint8_t temp  = 0x00;
 	uint16_t checkTxOK = 0 ;
 
-	if(mode & RESPONSE_EXPECTED)
+    if(mode == RESPONSE_EXPECTED || mode == DELAYED_TX_WITH_RESPONSE)
 	{
 		temp = (uint8_t)(SYS_CTRL_WAIT4RESP| SYS_CTRL_TXSTRT) ; // Set wait4response bit
 	}
 
-	if (mode & START_TX_DELAYED)
+    if (mode == START_TX_DELAYED || mode == DELAYED_TX_WITH_RESPONSE)
 	{
 		// Both SYS_CTRL_TXSTRT and SYS_CTRL_TXDLYS to correctly enable TX
 		temp |= (uint8_t)(SYS_CTRL_TXDLYS | SYS_CTRL_TXSTRT) ;
@@ -1380,7 +1380,7 @@ void
 modm::Dw1000< Spi, Cs, Reset, Irq >::hardreset()
 {
 	Reset::set();
-	modm::delayMilliseconds(5);
+	modm::delayMilliseconds(20);
 	Reset::reset();
 }
 

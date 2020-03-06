@@ -48,7 +48,7 @@ public:
 		//FRAME TYPES
 		BEACON					= 0b000,
 		DATA					= 0b001,
-		ACKNOWLEDGMENT			= 0b010,
+		ACKNOWLEDGMENT			= 0b0100000,
 		MAC_COMMAND				= 0b011,
 
 		VERSION_2004			= 0x00,

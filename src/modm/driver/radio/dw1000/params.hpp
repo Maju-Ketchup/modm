@@ -128,7 +128,8 @@ public:
 	enum TX_Mode{
 		START_TX_IMMEDIATE			= 0,
 		RESPONSE_EXPECTED			= 2,
-		START_TX_DELAYED			= 1
+        START_TX_DELAYED			= 1,
+        DELAYED_TX_WITH_RESPONSE    = 3
 	};
 	enum RX_Mode{
 		START_RX_IMMEDIATE			= 0,
